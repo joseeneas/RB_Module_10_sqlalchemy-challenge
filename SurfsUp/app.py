@@ -57,8 +57,7 @@ def welcome():
 	    f"....station for the previous year of data.<br/>"
 	    f"....Return a JSON list of temperature observations for the previous year<br/>"
         f"<br/>"
-        f"<strong>/api/v1.0/&ltstart&gt</strong><br/>"
-        f"<strong>/api/v1.0/&ltstart&gt/&ltend></strong><br/>"
+        f"<strong>/api/v1.0/period/</strong><br/>"
         f"<br/>"
         f"....Return a JSON list of the minimum temperature, the average<br/>"
 	    f"....temperature, and the maximum temperature for a specified start or<br/>"
@@ -82,7 +81,10 @@ def precipitationdata():
     High_date = dt.datetime.strptime(max_date.date, "%Y-%m-%d")
     Low_date = High_date - dt.timedelta(days=366) 
     # Retrieve the data and store it in a DataFrame
-    results    = session.query(MeasurementTable.date,MeasurementTable.prcp).filter(MeasurementTable.date <= High_date).filter(MeasurementTable.date >= Low_date)
+    results    = session.query(MeasurementTable.date,\
+                               MeasurementTable.prcp).\
+                               filter(MeasurementTable.date <= High_date).\
+                               filter(MeasurementTable.date >= Low_date)
     session.close()
     # Convert list of tuples into normal list
     all_precipitation = []
@@ -126,9 +128,15 @@ def tobsdata():
     #
     # Create our session (link) from Python to the DB
     session = Session(engine)
-    countStation = session.query(MeasurementTable.station,func.count(MeasurementTable.station).label("countstation")).group_by(MeasurementTable.station).order_by(func.count(MeasurementTable.station).desc())
+    countStation = session.query(MeasurementTable.station,\
+                                 func.count(MeasurementTable.station).label("countstation")).\
+                                 group_by(MeasurementTable.station).\
+                                 order_by(func.count(MeasurementTable.station).desc())
     FirstStation = countStation.first().station
-    results = session.query(MeasurementTable.station,MeasurementTable.date,MeasurementTable.prcp).filter(MeasurementTable.station == FirstStation).all()
+    results = session.query(MeasurementTable.station,\
+                            MeasurementTable.date,\
+                            MeasurementTable.prcp).\
+                            filter(MeasurementTable.station == FirstStation).all()
     session.close()
     # Convert list of tuples into normal list
     all_tobs = []
